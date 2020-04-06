@@ -108,30 +108,30 @@ def add_doc():
 def delete_doc():
     doc_number = input('Введите номер документа для удаления:>')
     if check_empty_input(doc_number):
-        doc_found = False
-        shelf_found = ''
+        doc_found = None
+        shelf_found = None
         for shelf in directories:
             if doc_number in directories[shelf]:
                 shelf_found = shelf
         for doc in documents:
             if doc_number == doc['number']:
-                doc_found = True
-        if shelf_found != '' and doc_found:
-            documents.remove(doc_number)
+                doc_found = doc
+        if shelf_found != '' and doc_found != '':
+            documents.remove(doc_found)
             shelf_content = directories[shelf_found]
             shelf_content.remove(doc_number)
-            directories.update(shelf_content)
+            directories[shelf_found] = shelf_content
             print('Удалён документ №', doc_number)
-        elif shelf_found != '' and not doc_found:
+        elif shelf_found != '' and doc_found == '':
             shelf_content = directories[shelf_found]
             shelf_content.remove(doc_number)
-            directories.update(shelf_content)
+            directories[shelf_found] = shelf_content
             print(f'Документ с номером {doc_number} не найден, но числится на полке. Документ удалён с полки.')
-        elif shelf_found == '' and not doc_found:
+        elif shelf_found == '' and doc_found == '':
             print(f'Документ с номером {doc_number} не найден, возможно он был удалён ранее.')
-        elif doc_found and shelf_found == '':
-            doc_to_shelf = input(
-                f'Документ №{doc_number} найден, но не привязан к полке. Хотитие переместить его на полку? (Y/N):>').upper()
+        elif doc_found != '' and shelf_found == '':
+            doc_to_shelf = input(f'Документ №{doc_number} существует, но не привязан к полке. Хотитие поместить его '
+                                 f'на полку? (Y/N):>').upper()
             if doc_to_shelf == 'Y':
                 move_doc()
 
@@ -154,7 +154,7 @@ def move_doc():
             if ins_doc == 'Y':
                 add_doc()
         elif not found_shelf:
-            ins_shelf = input(f'Полка №{parameters[3]} не найдена, хотите добавить новую полку? (Y/N):>').upper()
+            ins_shelf = input(f'Полка №{parameters[1]} не найдена, хотите добавить новую полку? (Y/N):>').upper()
             if ins_shelf == 'Y':
                 add_or_clear_shelf()
         elif number_shelf == parameters[1] and found_doc:
@@ -174,8 +174,8 @@ def add_or_clear_shelf():
             directories[shelf_number] = []
             print(f'Полка № {shelf_number} успешно добавлена')
         else:
-            clear_shelf = input(f'Полка с номером {shelf_number} уже существует. Хотите её очистить? (Y/N):>')
-            if clear_shelf == 'Y' or clear_shelf == 'y':
+            clear_shelf = input(f'Полка с номером {shelf_number} уже существует. Хотите её очистить? (Y/N):>').upper()
+            if clear_shelf == 'Y':
                 directories[shelf_number] = []
 
 
@@ -185,9 +185,9 @@ def show_all_docs():
 
 
 def load_data():
-    with open(r'..\fixtures\documents.json', 'r', encoding='utf-8') as docs:
+    with open(r'fixtures\documents.json', 'r', encoding='utf-8') as docs:
         documents = json.load(docs)
-    with open(r'..\fixtures\directories.json', 'r', encoding='utf-8') as dirs:
+    with open(r'fixtures\directories.json', 'r', encoding='utf-8') as dirs:
         directories = json.load(dirs)
     return documents, directories
 

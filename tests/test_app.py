@@ -45,6 +45,7 @@ class TestApp(unittest.TestCase):
             with patch('sys.stdout', new=StringIO()) as printOutput:
                 app.find_people_by_docnumber()
                 output = printOutput.getvalue().strip()
+            print(output)
             self.assertEqual(output, test_str)
 
         test_str2 = 'Документ №1000 не найден, хотите его добавить? (Y/N):>'
@@ -146,6 +147,16 @@ class TestApp(unittest.TestCase):
         def delete_doc_not_in_docs(*a, **kw):
             print(*a)
             return '10'
+
+        test_str = 'Удалён документ № 10006'
+        with patch('app.input', return_value='10006'):
+            with patch('sys.stdout', new=StringIO()) as printOutput:
+                app.delete_doc()
+                output = printOutput.getvalue().strip()
+            print('output = ', output)
+            self.assertEqual(output, test_str)
+
+
 
 
 if __name__ == '__main__':
