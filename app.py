@@ -1,3 +1,5 @@
+import json
+
 documents = [
     {"type": "passport", "number": "2207 876234", "name": "Василий Гупкин"},
     {"type": "invoice", "number": "11-2", "name": "Геннадий Покемонов"},
@@ -56,7 +58,7 @@ def find_people_by_docnumber():
             if docnumber == document['number']:
                 found_doc = document
         if found_doc:
-                print(f'Владельцем документа №{docnumber} является {found_doc["name"]}')
+            print(f'Владельцем документа №{docnumber} является {found_doc["name"]}')
         else:
             ins_doc = input(f'Документ №{docnumber} не найден, хотите его добавить? (Y/N):>').upper()
             if ins_doc == 'Y':
@@ -124,11 +126,12 @@ def delete_doc():
             shelf_content = directories[shelf_found]
             shelf_content.remove(doc_number)
             directories.update(shelf_content)
-            print(f'Документ с номером {doc_number} не найден, но числится на поке. Документ удалён с полки.')
+            print(f'Документ с номером {doc_number} не найден, но числится на полке. Документ удалён с полки.')
         elif shelf_found == '' and not doc_found:
             print(f'Документ с номером {doc_number} не найден, возможно он был удалён ранее.')
         elif doc_found and shelf_found == '':
-            doc_to_shelf = input(f'Документ №{doc_number} найден, но не привязан к полке. Хотитие переместить его на полку? (Y/N):>').upper()
+            doc_to_shelf = input(
+                f'Документ №{doc_number} найден, но не привязан к полке. Хотитие переместить его на полку? (Y/N):>').upper()
             if doc_to_shelf == 'Y':
                 move_doc()
 
@@ -181,7 +184,16 @@ def show_all_docs():
         print(f'№{doc["number"]}, документ имеет тип: {doc["type"]}, а его владелец {doc["name"]}')
 
 
+def load_data():
+    with open(r'..\fixtures\documents.json', 'r', encoding='utf-8') as docs:
+        documents = json.load(docs)
+    with open(r'..\fixtures\directories.json', 'r', encoding='utf-8') as dirs:
+        directories = json.load(dirs)
+    return documents, directories
+
+
 def main():
+    load_data()
     while True:
         user_command = input('Введите команду и нажмите Enter:>')
         if check_empty_input(user_command) and verify_command(user_command):
@@ -204,6 +216,7 @@ def main():
                 add_or_clear_shelf()
             elif user_command == 'h':
                 show_commands(False)
+
 
 if __name__ == '__main__':
     main()
