@@ -1,12 +1,15 @@
 import unittest
 import json
 import app
-import sys
+import importlib
 from io import StringIO
 from unittest.mock import patch
 
 
 class TestApp(unittest.TestCase):
+
+    def setUp(self):
+        importlib.reload(app)
 
     def setUp(self):
         with open(r'..\fixtures\documents.json', 'r', encoding='utf-8') as docs:
@@ -132,32 +135,46 @@ class TestApp(unittest.TestCase):
             self.assertIn(test_str, output)
 
     def test_delete_doc(self):
-        def delete_doc_normal(*a, **kw):
-            print(*a)
-            return '10006'
 
-        def delete_doc_not_exist(*a, **kw):
-            print(*a)
-            return '1000'
-
-        def delete_doc_not_in_shelf(*a, **kw):
-            print(*a)
-            return '100'
-
-        def delete_doc_not_in_docs(*a, **kw):
-            print(*a)
-            return '10'
-
-        test_str = 'Удалён документ № 10006'
-        with patch('app.input', return_value='10006'):
+        old_len_docs = len(app.documents)
+        test_str = 'Удалён документ № 11-2'
+        with patch('app.input', return_value='11-2'):
             with patch('sys.stdout', new=StringIO()) as printOutput:
                 app.delete_doc()
                 output = printOutput.getvalue().strip()
-            print('output = ', output)
+            new_len_docs = len(app.documents)
+            self.assertGreater(old_len_docs, new_len_docs)
             self.assertEqual(output, test_str)
 
+        old_len_docs = len(app.documents)
+        test_str = 'Документ с номером 1000 не найден, возможно он был удалён ранее.'
+        with patch('app.input', return_value='1000'):
+            with patch('sys.stdout', new=StringIO()) as printOutput:
+                app.delete_doc()
+                output = printOutput.getvalue().strip()
+            new_len_docs = len(app.documents)
+            self.assertEqual(old_len_docs, new_len_docs)
+            self.assertEqual(output, test_str)
 
+        old_len_docs = len(app.documents)
+        test_str = 'Документ с номером 10 не найден, но числится на полке. Документ удалён с полки.'
+        with patch('app.input', return_value='10'):
+            with patch('sys.stdout', new=StringIO()) as printOutput:
+                app.delete_doc()
+                output = printOutput.getvalue().strip()
+            new_len_docs = len(app.documents)
+            self.assertEqual(old_len_docs, new_len_docs)
+            self.assertEqual(output, test_str)
 
+        old_len_docs = len(app.documents)
+        test_str = 'Документ №100 существует, но не привязан к полке. Хотитие поместить его на полку? (Y/N):>'
+        with patch('app.input', return_value='100'):
+            with patch('sys.stdout', new=StringIO()) as printOutput:
+                app.delete_doc()
+                output = printOutput.getvalue().strip()
+            new_len_docs = len(app.documents)
+            self.assertEqual(old_len_docs, new_len_docs)
+            self.assertEqual(output, test_str)
 
 if __name__ == '__main__':
     unittest.runner()

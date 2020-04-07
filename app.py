@@ -1,15 +1,25 @@
 import json
 
-documents = [
-    {"type": "passport", "number": "2207 876234", "name": "Василий Гупкин"},
-    {"type": "invoice", "number": "11-2", "name": "Геннадий Покемонов"},
-    {"type": "insurance", "number": "10006", "name": "Аристарх Павлов"}
-]
-directories = {
-    '1': ['2207 876234', '11-2', '5455 028765'],
-    '2': ['10006', '5400 028765', '5455 002299'],
-    '3': []
-}
+documents = list()
+directories = dict()
+
+def load_data():
+    global documents, directories
+    with open(r'fixtures\documents.json', 'r', encoding='utf-8') as docs:
+        documents = json.load(docs)
+    with open(r'fixtures\directories.json', 'r', encoding='utf-8') as dirs:
+        directories = json.load(dirs)
+    return documents, directories
+# documents = [
+#     {"type": "passport", "number": "2207 876234", "name": "Василий Гупкин"},
+#     {"type": "invoice", "number": "11-2", "name": "Геннадий Покемонов"},
+#     {"type": "insurance", "number": "10006", "name": "Аристарх Павлов"}
+# ]
+# directories = {
+#     '1': ['2207 876234', '11-2', '5455 028765'],
+#     '2': ['10006', '5400 028765', '5455 002299'],
+#     '3': []
+# }
 commands = {
     'p': 'people – команда, которая спросит номер документа и выведет имя человека, которому он принадлежит',
     'l': 'list – команда, которая выведет список всех документов',
@@ -111,25 +121,26 @@ def delete_doc():
         doc_found = None
         shelf_found = None
         for shelf in directories:
+            curr_dir = directories[shelf]
             if doc_number in directories[shelf]:
                 shelf_found = shelf
         for doc in documents:
             if doc_number == doc['number']:
                 doc_found = doc
-        if shelf_found != '' and doc_found != '':
+        if shelf_found is not None and doc_found is not None:
             documents.remove(doc_found)
             shelf_content = directories[shelf_found]
             shelf_content.remove(doc_number)
             directories[shelf_found] = shelf_content
             print('Удалён документ №', doc_number)
-        elif shelf_found != '' and doc_found == '':
+        elif shelf_found != None and doc_found == None:
             shelf_content = directories[shelf_found]
             shelf_content.remove(doc_number)
             directories[shelf_found] = shelf_content
             print(f'Документ с номером {doc_number} не найден, но числится на полке. Документ удалён с полки.')
-        elif shelf_found == '' and doc_found == '':
+        elif shelf_found == None and doc_found == None:
             print(f'Документ с номером {doc_number} не найден, возможно он был удалён ранее.')
-        elif doc_found != '' and shelf_found == '':
+        elif doc_found != None and shelf_found == None:
             doc_to_shelf = input(f'Документ №{doc_number} существует, но не привязан к полке. Хотитие поместить его '
                                  f'на полку? (Y/N):>').upper()
             if doc_to_shelf == 'Y':
@@ -182,14 +193,6 @@ def add_or_clear_shelf():
 def show_all_docs():
     for doc in documents:
         print(f'№{doc["number"]}, документ имеет тип: {doc["type"]}, а его владелец {doc["name"]}')
-
-
-def load_data():
-    with open(r'fixtures\documents.json', 'r', encoding='utf-8') as docs:
-        documents = json.load(docs)
-    with open(r'fixtures\directories.json', 'r', encoding='utf-8') as dirs:
-        directories = json.load(dirs)
-    return documents, directories
 
 
 def main():
