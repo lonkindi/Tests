@@ -1,15 +1,24 @@
 import json
+import os
 
 documents = list()
 directories = dict()
 
+
 def load_data():
     global documents, directories
-    with open(r'fixtures\documents.json', 'r', encoding='utf-8') as docs:
+    current_path = str(os.path.dirname(os.path.abspath(__file__)))
+    path_dirs = os.path.join(current_path, 'fixtures', 'directories.json')
+    path_docs = os.path.join(current_path, 'fixtures', 'documents.json')
+    # path_dirs = os.path.join('fixtures', 'directories.json')
+    # print(path_docs)
+    with open(path_docs, 'r', encoding='utf-8') as docs:
         documents = json.load(docs)
-    with open(r'fixtures\directories.json', 'r', encoding='utf-8') as dirs:
+    with open(path_dirs, 'r', encoding='utf-8') as dirs:
         directories = json.load(dirs)
     return documents, directories
+
+
 # documents = [
 #     {"type": "passport", "number": "2207 876234", "name": "Василий Гупкин"},
 #     {"type": "invoice", "number": "11-2", "name": "Геннадий Покемонов"},
@@ -141,7 +150,7 @@ def delete_doc():
         elif shelf_found == None and doc_found == None:
             print(f'Документ с номером {doc_number} не найден, возможно он был удалён ранее.')
         elif doc_found != None and shelf_found == None:
-            doc_to_shelf = input(f'Документ №{doc_number} существует, но не привязан к полке. Хотитие поместить его '
+            doc_to_shelf = input(f'Документ №{doc_number} существует, но не привязан к полке. Хотите поместить его '
                                  f'на полку? (Y/N):>').upper()
             if doc_to_shelf == 'Y':
                 move_doc()
@@ -151,14 +160,14 @@ def move_doc():
     parameters = tuple(map(str, input('Введите номер документа и номер полки, куда его переметить, через точку с '
                                       'запятой:>').split(sep=';')))
     if len(parameters) == 2:
-        found_doc = False
-        found_shelf = False
-        number_shelf = ''
+        found_doc = None
+        found_shelf = None
+        number_shelf = None
         if directories.get(parameters[1]) != None:
-            found_shelf = True
+            found_shelf = parameters[1]
         for shelf in directories:
             if parameters[0] in directories[shelf]:
-                found_doc = True
+                found_doc = parameters[0]
                 number_shelf = shelf
         if not found_doc:
             ins_doc = input(f'Документ №{parameters[0]} не найден, хотите добавить этот документ? (Y/N):>').upper()
