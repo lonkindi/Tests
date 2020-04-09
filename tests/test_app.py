@@ -233,7 +233,6 @@ class TestApp(unittest.TestCase):
             self.assertEqual(new_dis_len, old_dist_len)
             self.assertIn(test_str, output)
 
-
         test_str = 'Полка №5 не найдена, хотите добавить новую полку? (Y/N):>'
         with patch('app.input', side_effect=move_doc_not_shelf):
             with patch('sys.stdout', new=StringIO()) as printOutput:

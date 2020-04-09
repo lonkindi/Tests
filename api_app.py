@@ -14,5 +14,6 @@ def translate_it(s_text, a_key=API_KEY, a_url=URL):
     response = requests.get(a_url, params=params)
     return response
 
+
 if __name__ == '__main__':
     print(translate_it('Hi!').json()['text'][0])
